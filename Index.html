@@ -1,0 +1,291 @@
+<html>
+<head>
+  <title>Alerts</title>
+  
+  <meta name="viewport" 
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+
+</head>
+<body style="background-color:rgb(20, 20, 20); align-content: center; margin: auto; max-width: 500px;">
+  <style>
+    /* Style the username form */
+    /* Works on Chrome, Edge, and Safari */
+    
+      li {
+        border-bottom: 1px dashed rgb(113, 113, 113);
+        list-style: none;
+        padding-left: 0 !important;
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
+        
+      }
+      ul {
+  padding-left: 1%;
+  padding-right: 1%;
+  padding-bottom: 2.5%;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+      
+      *::-webkit-scrollbar {
+        width: 7px;
+        border-radius: 100px;
+        
+      }
+
+      *::-webkit-scrollbar-track {
+        
+        border-radius: 100px;
+        
+      }
+
+      *::-webkit-scrollbar-thumb {
+        background-color: rgb(104, 135, 146);
+        border-radius: 100px;
+        border: 0px solid rgb(0, 0, 0);
+        margin-right: 10;
+      }
+    
+    #message-form {
+
+      display: flex;
+      text-align: center;
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 5px;
+      
+      margin: auto;
+      margin-top: auto;
+    }
+    #message-sub {
+      display: flex;
+      text-align: center;
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 5px;
+    
+      margin: auto;
+      margin-top: auto;
+
+    }
+    #change_btn {
+      
+      text-align: center;
+      
+      align-items: center;
+      align-content: center;
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 5px;
+    
+      margin: auto;
+      margin-top: auto;
+      
+
+    }
+
+    #change_colour {
+      display: flex;
+      text-align: center ;
+      
+      align-items: center;
+      align-content: center;
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 5px;
+    
+      margin: auto;
+      margin-top: auto;
+      
+
+    }
+
+    #messages {
+      
+      background-color: rgb(70, 71, 72);
+      border-radius: 12px;
+      min-width: auto;
+      max-width: auto;
+      min-height: 65%; 
+       
+      height: 15%;
+      border: 2px solid gray;
+      margin-left: auto;
+
+      display: flex;
+      flex-direction: column-reverse;
+
+      color: rgb(189, 185, 185);
+      font-size: 105%;
+      font-family: Arial, Helvetica, sans-serif;
+      
+      
+      overflow-y:scroll;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    #cooldown-indicator {
+      display: inline-block;
+      border: 1px solid red;
+      border-radius: 5px;
+      padding: 2px 5px;
+
+    
+    }
+    ::-ms-input-placeholder { /* Microsoft Edge */
+      color: rgb(189, 185, 185);
+    }
+    ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+      color: rgb(189, 185, 185);
+      opacity: 1; /* Firefox */
+    }
+    input[type=text]:active, input[type=text]:focus {
+      background-color: rgb(113, 113, 113);
+    }
+    .center-text {
+    text-align: center;
+  }
+
+    
+  </style>
+  
+  <h1 style="align-self: auto; text-align: center; color: rgb(113, 113, 113);">Alerts App</h1>
+  <ul id="messages"></ul>
+  
+  <form id="message-form" name="message-form">
+    <input type="text" name="username" id="username" placeholder="Enter name" style="border-color: black; border-radius: 50px; text-align: center; width: auto; border-color: rgb(169, 172, 173); margin-left: auto;
+     width: 150; height: 30; background-color: rgb(113, 113, 113); color: rgb(189, 185, 185)"/>
+    <input type="text" name="messages" id="message" placeholder="Custom Alert" style=" border-color: black; border-radius: 50px; text-align: center; width: auto; border-color: rgb(169, 172, 173); margin-right: auto;
+     width: 200; height: 30; background-color: rgb(113, 113, 113); color: rgb(189, 185, 185);" />
+    
+  </form>
+  <br>
+  <form id="message-sub">
+    <button type="submit" class="center-text" style="width: auto; background-color: rgb(111, 111, 111); border-radius: 20px; color:  white; border-color: rgb(169, 172, 173); margin-left: auto; margin-right: auto; width: 125; height: 25;"> Send </button>
+  </form>
+  <div id="cooldown-indicator" style="display: none; text-align: center;">
+    <small style="color: red">Cooldown for 5 Seconds</small>
+  </div>
+  <br>
+  <div id="change_colour">
+    <button id="change_btn" style="width: auto; background-color: rgb(111, 111, 111); border-radius: 20px; color:  white; border-color: rgb(169, 172, 173); margin-left: auto; margin-right: auto; width: 125; height: 25; "
+     onclick="changeclr()">
+      Light Mode </button>
+  </div>
+
+
+
+
+
+  
+
+
+
+  <script>
+    // Set up websocket connection
+    let socket = new WebSocket('ws://2.216.112.75:8080');
+    
+    
+    let canSendMessage = true;
+    let currentServer = 'server1';
+    let canChangeclr = true;
+
+    function changeclr() {
+      if (canChangeclr) {
+        document.body.style.backgroundColor = 'rgb(169, 166, 166)';
+        document.getElementById('messages').style.backgroundColor = 'rgb(228, 218, 218)'; 
+        document.getElementById('messages').style.borderBottom = 'black';
+        document.getElementById('messages').style.color = 'black';
+        document.getElementById('change_btn').textContent = 'Dark Mode';
+        canChangeclr = false;
+      }
+    
+      else {
+        document.body.style.backgroundColor = 'rgb(20, 20, 20)';
+        document.getElementById('messages').style.backgroundColor = 'rgb(70, 71, 72)'; 
+        document.getElementById('messages').style.borderBottom = 'rgb(113, 113, 113)';
+        document.getElementById('messages').style.color = 'rgb(189, 185, 185)';
+        document.getElementById('change_btn').textContent = 'Light Mode';
+        canChangeclr = true;
+    }};
+
+    
+    // Send message when the form is submitted
+    document.getElementById('message-sub').addEventListener('submit', (event) => {
+    event.preventDefault();
+    const input = document.getElementById('message');
+    const input2 = document.getElementById('username');
+
+    if (input.value.trim() === '') {
+      // If the message is an empty string, don't send it and return early
+      if (input2.value.trim() === '') {
+      // If the message is an empty string, don't send it and return early
+    return;
+    };
+      if (canSendMessage) {
+      document.getElementById('cooldown-indicator').style.display = 'none';
+      socket.send(input2.value + ' is in trouble');
+    
+    
+    input.value = '';
+
+    canSendMessage = false;
+    setTimeout(() => {
+      canSendMessage = true;
+    }, 5000);
+  } else {document.getElementById('cooldown-indicator').style.display = 'block'};
+
+  
+  return;
+    };
+    if (input2.value.trim() === '') {
+      // If the message is an empty string, don't send it and return early
+    return;
+    };
+
+    if (canSendMessage) {
+      document.getElementById('cooldown-indicator').style.display = 'none';
+      socket.send(input2.value + ' needs help due to ' + input.value);
+    
+    
+    input.value = '';
+
+    canSendMessage = false;
+    setTimeout(() => {
+      canSendMessage = true;
+    }, 5000);
+  }
+    else {
+    // If the user cannot send a message, show a visual indication
+    document.getElementById('cooldown-indicator').style.display = 'block';
+    }});
+
+    // Add message to the chat window when a message is received
+    socket.addEventListener('message', (event) => {
+    const message = event.data;
+    const li = document.createElement('li');
+    li.innerHTML = message;
+    const messages = document.getElementById('messages');
+    //messages.appendChild(li);
+    messages.prepend(li);
+
+    // Scroll the chat box to the bottom
+    messages.scrollTop = messages.scrollHeight;
+    messages.scrollIntoView(true);
+    });
+
+    socket.addEventListener('error', function(event) {
+    console.log('Error:', event);    
+
+    
+
+
+
+
+
+  });
+  </script>
+
+ 
+</body> 
+</html>
